@@ -29,11 +29,11 @@ TCPSOCKET *tcpsocket_accept(int listen_socket);
 /* 
 * It return the ip address of the accepted client connection 
 */
-char *get_ipclient(TCPSOCKET *sstream);
+char *get_ip_peer(TCPSOCKET *sstream);
 /* 
 * It return the port number of the accepted client connection 
 */
-char *get_portclient(TCPSOCKET *sstream);
+char *get_port_peer(TCPSOCKET *sstream);
 
 /* close a connected or accepted TCPSOCKET socket stream */
 int tcpsocket_close(TCPSOCKET *tcpf);

@@ -19,8 +19,8 @@ typedef struct TCPSOCKET {
     size_t nleft;
     int fd;
     int ungotten;   /* ungetc char */
-    char *ip_conn;
-    char *port_conn;
+    char *ip_peer;
+    char *port_peer;
     char *bufp;
     char buf[MAXBUFSIZE];
 }TCPSOCKET;
@@ -34,7 +34,7 @@ static TCPSOCKET *init_tcpsocket(int fd)
     res->nleft = 0;
     res->bufp = res->buf;
     res->ungotten = EOF;
-    res->ip_conn = res->port_conn = NULL;
+    res->ip_peer = res->port_peer = NULL;
     return res;
 }
 
@@ -45,11 +45,11 @@ int tcpsocket_close(TCPSOCKET *sstream)
         fprintf(stderr, "warning: tcpsocket still has %lu bytes unread\n", sstream->nleft);
     }
     Close(sstream->fd);
-    if (sstream->ip_conn){
-        free(sstream->ip_conn);
+    if (sstream->ip_peer){
+        free(sstream->ip_peer);
     }
-    if (sstream->port_conn){
-        free(sstream->port_conn);
+    if (sstream->port_peer){
+        free(sstream->port_peer);
     }
     free(sstream);
     return 0;
@@ -165,14 +165,14 @@ TCPSOCKET *tcpsocket_accept(int listenfd)
     }
     TCPSOCKET *sstream = init_tcpsocket(socketfd);
     int flags = NI_NUMERICHOST | NI_NUMERICSERV;
-    sstream->ip_conn = malloc(IPLEN * sizeof(char));
-    sstream->port_conn = malloc(PORTLEN * sizeof(char));
+    sstream->ip_peer = malloc(IPLEN * sizeof(char));
+    sstream->port_peer = malloc(PORTLEN * sizeof(char));
     int errcode;
     do{
         errcode = getnameinfo(
                 (struct sockaddr *) &generic_addr, generic_len,
-                sstream->ip_conn, IPLEN,
-                sstream->port_conn, PORTLEN, flags);
+                sstream->ip_peer, IPLEN,
+                sstream->port_peer, PORTLEN, flags);
     }while(errcode != 0 && errcode == EAI_AGAIN);
     if (errcode != 0){
         fprintf(stderr, "getnameinfo error: %s\n", gai_strerror(errcode));
@@ -183,15 +183,15 @@ TCPSOCKET *tcpsocket_accept(int listenfd)
 }
 
 /* implicitly thread-safe */
-char *get_ipclient(TCPSOCKET *sstream)
+char *get_ip_peer(TCPSOCKET *sstream)
 {
-    return sstream->ip_conn;
+    return sstream->ip_peer;
 } 
 
 /* implicitly thread-safe */
-char *get_portclient(TCPSOCKET *sstream)
+char *get_port_peer(TCPSOCKET *sstream)
 {
-    return sstream->port_conn;
+    return sstream->port_peer;
 } 
 
 /* implicitly thread-safe */
